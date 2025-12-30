@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { StepCard } from "@/components/StepCard";
 import { PersonaCard } from "@/components/PersonaCard";
 import { ValuePillar } from "@/components/ValuePillar";
 import { PlatformDiagram } from "@/components/PlatformDiagram";
+import { ContactModal } from "@/components/ContactModal";
 import { motion } from "framer-motion";
 import { 
   Bot, 
@@ -23,7 +25,6 @@ import {
   Building2,
   Lightbulb,
   Lock,
-  Layers,
   Scale,
   ArrowRight
 } from "lucide-react";
@@ -139,6 +140,8 @@ const valuePillars = [
 ];
 
 export default function Index() {
+  const [contactOpen, setContactOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -167,12 +170,12 @@ export default function Index() {
               Deploy bots, agents, automations, MCP tools, and voice AI with governance, observability, and human control.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button variant="hero" size="lg">
+              <Button variant="hero" size="lg" onClick={() => setContactOpen(true)}>
                 Request Demo
                 <ArrowRight className="h-3 w-3" />
               </Button>
-              <Button variant="hero-outline" size="lg">
-                Explore Platform
+              <Button variant="hero-outline" size="lg" asChild>
+                <a href="#platform">Explore Platform</a>
               </Button>
             </div>
           </motion.div>
@@ -323,7 +326,7 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground mb-6">
                   From proof of concept to company-wide deployment with the same platform.
                 </p>
-                <Button variant="hero">
+                <Button variant="hero" onClick={() => setContactOpen(true)}>
                   Talk to Sales
                   <ArrowRight className="h-3 w-3" />
                 </Button>
@@ -350,11 +353,11 @@ export default function Index() {
               Join the enterprises transforming their operations with controlled, observable, and governed AI.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button variant="hero" size="lg">
+              <Button variant="hero" size="lg" onClick={() => setContactOpen(true)}>
                 Request Demo
                 <ArrowRight className="h-3 w-3" />
               </Button>
-              <Button variant="hero-outline" size="lg">
+              <Button variant="hero-outline" size="lg" onClick={() => setContactOpen(true)}>
                 Contact Sales
               </Button>
             </div>
@@ -363,6 +366,8 @@ export default function Index() {
       </section>
 
       <Footer />
+      
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );
 }
