@@ -1,8 +1,9 @@
-import { ReactNode } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { ContactModal } from "@/components/ContactModal";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, LucideIcon } from "lucide-react";
 
@@ -31,6 +32,8 @@ export function FeaturePageLayout({
   useCases,
   integration,
 }: FeaturePageLayoutProps) {
+  const [contactOpen, setContactOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -68,11 +71,11 @@ export function FeaturePageLayout({
               {subheadline}
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button variant="hero" size="lg">
+              <Button variant="hero" size="lg" onClick={() => setContactOpen(true)}>
                 Request Demo
                 <ArrowRight className="h-3 w-3" />
               </Button>
-              <Button variant="hero-outline" size="lg">
+              <Button variant="hero-outline" size="lg" onClick={() => setContactOpen(true)}>
                 See It in Action
               </Button>
             </div>
@@ -226,11 +229,11 @@ export function FeaturePageLayout({
               See how {title} can transform your enterprise AI operations.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button variant="hero">
+              <Button variant="hero" onClick={() => setContactOpen(true)}>
                 Talk to an Expert
                 <ArrowRight className="h-3 w-3" />
               </Button>
-              <Button variant="hero-outline">
+              <Button variant="hero-outline" onClick={() => setContactOpen(true)}>
                 See It in Action
               </Button>
             </div>
@@ -239,6 +242,8 @@ export function FeaturePageLayout({
       </section>
 
       <Footer />
+      
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );
 }
