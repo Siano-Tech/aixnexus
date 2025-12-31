@@ -8,6 +8,7 @@ import { PersonaCard } from "@/components/PersonaCard";
 import { ValuePillar } from "@/components/ValuePillar";
 import { PlatformDiagram } from "@/components/PlatformDiagram";
 import { ContactModal } from "@/components/ContactModal";
+import { ContactFormSection } from "@/components/ContactFormSection";
 import { motion } from "framer-motion";
 import { 
   Bot, 
@@ -364,6 +365,8 @@ export default function Index() {
           </motion.div>
         </div>
       </section>
+
+      <ContactFormSection />
 
       <Footer />
       

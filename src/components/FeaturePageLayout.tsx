@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { ContactModal } from "@/components/ContactModal";
+import { ContactFormSection } from "@/components/ContactFormSection";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, LucideIcon } from "lucide-react";
 
@@ -240,6 +241,8 @@ export function FeaturePageLayout({
           </motion.div>
         </div>
       </section>
+
+      <ContactFormSection />
 
       <Footer />
       
