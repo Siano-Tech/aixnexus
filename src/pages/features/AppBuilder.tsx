@@ -6,7 +6,11 @@ const AppBuilderDemoMockup = () => (
   <div className="relative max-w-4xl mx-auto">
     <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-transparent to-primary/20 blur-xl opacity-50" />
     
-    <div className="relative border border-border bg-card overflow-hidden">
+    <motion.div 
+      className="relative border border-border bg-card overflow-hidden"
+      whileHover={{ scale: 1.005 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
       {/* Browser chrome */}
       <div className="flex items-center gap-2 px-4 py-3 bg-muted/50 border-b border-border">
         <div className="flex gap-1.5">
@@ -49,7 +53,8 @@ const AppBuilderDemoMockup = () => (
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 + i * 0.05 }}
                   viewport={{ once: true }}
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.1, y: -3, boxShadow: "0 4px 12px hsl(var(--primary) / 0.15)" }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <comp.icon className="h-4 w-4 text-muted-foreground" />
                   <span className="text-[9px] text-muted-foreground">{comp.label}</span>
@@ -70,6 +75,8 @@ const AppBuilderDemoMockup = () => (
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 + i * 0.1 }}
                   viewport={{ once: true }}
+                  whileHover={{ scale: 1.05, x: 5 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <Sparkles className="h-3 w-3 text-primary" />
                   <span className="text-[10px] font-mono">{block.label}</span>
@@ -96,11 +103,13 @@ const AppBuilderDemoMockup = () => (
             <div className="relative p-4 space-y-3">
               {/* Header Component */}
               <motion.div 
-                className="border-2 border-primary/50 bg-card rounded p-3 relative group"
+                className="border-2 border-primary/50 bg-card rounded p-3 relative group cursor-pointer"
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
                 viewport={{ once: true }}
+                whileHover={{ scale: 1.02, borderColor: "hsl(var(--primary))" }}
+                whileTap={{ scale: 0.98 }}
               >
                 <div className="absolute -top-2 -left-2 w-4 h-4 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-move">
                   <Move className="h-2 w-2 text-primary-foreground absolute inset-0 m-auto" />
@@ -111,11 +120,13 @@ const AppBuilderDemoMockup = () => (
               
               {/* AI Chat Component */}
               <motion.div 
-                className="border-2 border-primary bg-card rounded overflow-hidden relative group"
+                className="border-2 border-primary bg-card rounded overflow-hidden relative group cursor-pointer"
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
                 viewport={{ once: true }}
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px hsl(var(--primary) / 0.2)" }}
+                whileTap={{ scale: 0.98 }}
               >
                 <div className="absolute -top-2 -left-2 w-4 h-4 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-move">
                   <Move className="h-2 w-2 text-primary-foreground absolute inset-0 m-auto" />
@@ -186,19 +197,27 @@ const AppBuilderDemoMockup = () => (
             </div>
             
             <div className="pt-2 border-t border-border space-y-2">
-              <button className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary/20 border border-primary/30 rounded text-[10px] font-mono text-primary hover:bg-primary/30 transition-colors">
+              <motion.button 
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary/20 border border-primary/30 rounded text-[10px] font-mono text-primary hover:bg-primary/30 transition-colors cursor-pointer"
+                whileHover={{ scale: 1.03, boxShadow: "0 0 15px hsl(var(--primary) / 0.3)" }}
+                whileTap={{ scale: 0.97 }}
+              >
                 <Eye className="h-3 w-3" />
                 Preview
-              </button>
-              <button className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-muted/50 border border-border rounded text-[10px] font-mono text-muted-foreground hover:bg-muted transition-colors">
+              </motion.button>
+              <motion.button 
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-muted/50 border border-border rounded text-[10px] font-mono text-muted-foreground hover:bg-muted transition-colors cursor-pointer"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+              >
                 <Code className="h-3 w-3" />
                 View Code
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   </div>
 );
 

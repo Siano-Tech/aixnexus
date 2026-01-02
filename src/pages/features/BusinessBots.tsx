@@ -4,7 +4,11 @@ import { motion } from "framer-motion";
 
 const BusinessBotDemo = () => (
   <div className="w-full max-w-4xl mx-auto">
-    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-2xl">
+    <motion.div 
+      className="bg-card border border-border rounded-xl overflow-hidden shadow-2xl"
+      whileHover={{ scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
       {/* Header */}
       <div className="bg-muted/50 px-4 py-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -64,7 +68,9 @@ const BusinessBotDemo = () => (
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 + i * 0.1 }}
-                    className={`px-3 py-2 rounded-lg text-xs font-mono border transition-all ${
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`px-3 py-2 rounded-lg text-xs font-mono border transition-all cursor-pointer ${
                       i === 1 
                         ? 'bg-primary text-primary-foreground border-primary' 
                         : 'bg-muted/50 border-border hover:border-primary/50'
@@ -85,6 +91,8 @@ const BusinessBotDemo = () => (
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.7 + i * 0.1 }}
+                    whileHover={{ scale: 1.08, y: -1 }}
+                    whileTap={{ scale: 0.95 }}
                     className={`px-3 py-1.5 rounded-full text-xs border cursor-pointer transition-all ${
                       i === 0
                         ? 'bg-primary/20 text-primary border-primary/30'
@@ -102,10 +110,14 @@ const BusinessBotDemo = () => (
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.1 }}
-            className="w-full bg-primary text-primary-foreground py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            whileHover={{ scale: 1.02, boxShadow: "0 0 20px hsl(var(--primary) / 0.3)" }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full bg-primary text-primary-foreground py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 cursor-pointer"
           >
             Continue
-            <ArrowRight className="h-4 w-4" />
+            <motion.span whileHover={{ x: 3 }} transition={{ type: "spring" }}>
+              <ArrowRight className="h-4 w-4" />
+            </motion.span>
           </motion.button>
         </motion.div>
 
@@ -128,17 +140,25 @@ const BusinessBotDemo = () => (
           <span className="text-xs text-muted-foreground">Also available on:</span>
           <div className="flex gap-2">
             {[Phone, Mail, MessageSquare].map((Icon, i) => (
-              <div key={i} className="p-1.5 bg-muted rounded border border-border">
+              <motion.div 
+                key={i} 
+                className="p-1.5 bg-muted rounded border border-border cursor-pointer"
+                whileHover={{ scale: 1.15, borderColor: "hsl(var(--primary) / 0.5)" }}
+                whileTap={{ scale: 0.9 }}
+              >
                 <Icon className="h-3 w-3 text-muted-foreground" />
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-        <div className="text-xs text-muted-foreground">
+        <motion.div 
+          className="text-xs text-muted-foreground cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+        >
           <span className="text-primary font-medium">247</span> leads qualified today
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   </div>
 );
 

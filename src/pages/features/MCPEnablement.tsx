@@ -4,7 +4,11 @@ import { motion } from "framer-motion";
 
 const MCPDemo = () => (
   <div className="w-full max-w-4xl mx-auto">
-    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-2xl">
+    <motion.div 
+      className="bg-card border border-border rounded-xl overflow-hidden shadow-2xl"
+      whileHover={{ scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
       {/* Header */}
       <div className="bg-muted/50 px-4 py-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -31,7 +35,8 @@ const MCPDemo = () => (
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-muted/50 border border-border rounded-lg p-3"
+            whileHover={{ scale: 1.03, borderColor: "hsl(var(--primary) / 0.5)" }}
+            className="bg-muted/50 border border-border rounded-lg p-3 cursor-pointer"
           >
             <div className="text-xs text-muted-foreground mb-2">AI Agent Request</div>
             <div className="font-mono text-xs bg-background rounded p-2 border border-border">
@@ -45,7 +50,8 @@ const MCPDemo = () => (
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-primary/10 border border-primary/30 rounded-lg p-3"
+            whileHover={{ scale: 1.03, boxShadow: "0 0 20px hsl(var(--primary) / 0.2)" }}
+            className="bg-primary/10 border border-primary/30 rounded-lg p-3 cursor-pointer"
           >
             <div className="text-xs text-primary mb-2 flex items-center gap-1">
               <Shield className="h-3 w-3" />
@@ -72,7 +78,8 @@ const MCPDemo = () => (
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-muted/50 border border-border rounded-lg p-3"
+            whileHover={{ scale: 1.03, borderColor: "hsl(var(--green-500) / 0.5)" }}
+            className="bg-muted/50 border border-border rounded-lg p-3 cursor-pointer"
           >
             <div className="text-xs text-muted-foreground mb-2">Secure Response</div>
             <div className="font-mono text-xs bg-background rounded p-2 border border-border">
@@ -114,7 +121,9 @@ const MCPDemo = () => (
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 + i * 0.1 }}
-              className="bg-muted/30 border border-border rounded-lg p-3"
+              whileHover={{ scale: 1.05, y: -3, borderColor: "hsl(var(--primary) / 0.5)" }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-muted/30 border border-border rounded-lg p-3 cursor-pointer"
             >
               <div className="flex items-center gap-2 mb-2">
                 <tool.icon className="h-4 w-4 text-primary" />
@@ -139,22 +148,32 @@ const MCPDemo = () => (
       <div className="px-4 py-3 border-t border-border bg-muted/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <motion.div 
+              className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer"
+              whileHover={{ scale: 1.05, color: "hsl(var(--primary))" }}
+            >
               <Clock className="h-3 w-3" />
               Last audit: 2 seconds ago
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            </motion.div>
+            <motion.div 
+              className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+            >
               <Shield className="h-3 w-3" />
               <span className="text-primary font-medium">12,847</span> requests validated today
-            </div>
+            </motion.div>
           </div>
-          <div className="flex items-center gap-1 text-xs">
+          <motion.div 
+            className="flex items-center gap-1 text-xs cursor-pointer"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <AlertTriangle className="h-3 w-3 text-yellow-500" />
             <span className="text-muted-foreground">3 blocked</span>
-          </div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   </div>
 );
 
