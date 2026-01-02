@@ -6,7 +6,11 @@ const ObservabilityDemoMockup = () => (
   <div className="relative max-w-4xl mx-auto">
     <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-transparent to-primary/20 blur-xl opacity-50" />
     
-    <div className="relative border border-border bg-card overflow-hidden">
+    <motion.div 
+      className="relative border border-border bg-card overflow-hidden"
+      whileHover={{ scale: 1.005 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
       {/* Browser chrome */}
       <div className="flex items-center gap-2 px-4 py-3 bg-muted/50 border-b border-border">
         <div className="flex gap-1.5">
@@ -39,11 +43,13 @@ const ObservabilityDemoMockup = () => (
           ].map((stat, i) => (
             <motion.div 
               key={stat.label}
-              className="p-3 border border-border rounded bg-muted/20"
+              className="p-3 border border-border rounded bg-muted/20 cursor-pointer"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + i * 0.05 }}
               viewport={{ once: true }}
+              whileHover={{ scale: 1.05, y: -3, borderColor: "hsl(var(--primary) / 0.5)" }}
+              whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center justify-between mb-2">
                 <stat.icon className={`h-4 w-4 ${stat.color}`} />
@@ -74,13 +80,15 @@ const ObservabilityDemoMockup = () => (
                   <span className="font-mono text-xs font-medium">AI Usage by Module</span>
                 </div>
                 <div className="flex gap-2">
-                  {["1D", "1W", "1M", "3M"].map((period) => (
-                    <button 
+                {["1D", "1W", "1M", "3M"].map((period) => (
+                    <motion.button 
                       key={period}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono ${period === "1W" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:bg-muted"}`}
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono cursor-pointer ${period === "1W" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:bg-muted"}`}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
                     >
                       {period}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -90,12 +98,13 @@ const ObservabilityDemoMockup = () => (
                 {[40, 65, 45, 80, 55, 70, 90, 75, 85, 60, 95, 70, 80, 65, 85, 90, 75, 80, 70, 85].map((height, i) => (
                   <motion.div 
                     key={i}
-                    className="flex-1 bg-gradient-to-t from-primary/30 to-primary/80 rounded-t"
+                    className="flex-1 bg-gradient-to-t from-primary/30 to-primary/80 rounded-t cursor-pointer"
                     style={{ height: `${height}%` }}
                     initial={{ height: 0 }}
                     whileInView={{ height: `${height}%` }}
                     transition={{ delay: 0.4 + i * 0.02, duration: 0.5 }}
                     viewport={{ once: true }}
+                    whileHover={{ scaleY: 1.1, backgroundColor: "hsl(var(--primary))" }}
                   />
                 ))}
               </div>
@@ -132,11 +141,12 @@ const ObservabilityDemoMockup = () => (
                 ].map((item, i) => (
                   <motion.div 
                     key={item.dept}
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-3 cursor-pointer"
                     initial={{ opacity: 0, x: -10 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6 + i * 0.1 }}
                     viewport={{ once: true }}
+                    whileHover={{ x: 5, scale: 1.02 }}
                   >
                     <span className="text-[10px] w-28 text-muted-foreground">{item.dept}</span>
                     <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
@@ -181,7 +191,7 @@ const ObservabilityDemoMockup = () => (
                 ].map((alert, i) => (
                   <motion.div 
                     key={alert.type}
-                    className={`p-2 rounded text-[10px] ${
+                    className={`p-2 rounded text-[10px] cursor-pointer ${
                       alert.level === "error" 
                         ? "bg-red-500/10 border border-red-500/30" 
                         : alert.level === "warn"
@@ -192,6 +202,8 @@ const ObservabilityDemoMockup = () => (
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 + i * 0.1 }}
                     viewport={{ once: true }}
+                    whileHover={{ scale: 1.03, x: -3 }}
+                    whileTap={{ scale: 0.97 }}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{alert.type}</span>
@@ -221,11 +233,12 @@ const ObservabilityDemoMockup = () => (
                 ].map((p, i) => (
                   <motion.div 
                     key={p.policy}
-                    className="flex items-center justify-between p-1.5 bg-muted/20 rounded"
+                    className="flex items-center justify-between p-1.5 bg-muted/20 rounded cursor-pointer"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ delay: 0.7 + i * 0.05 }}
                     viewport={{ once: true }}
+                    whileHover={{ scale: 1.02, backgroundColor: "hsl(var(--muted) / 0.4)" }}
                   >
                     <span className="text-[10px]">{p.policy}</span>
                     <div className="flex items-center gap-1">
@@ -237,14 +250,18 @@ const ObservabilityDemoMockup = () => (
               </div>
             </div>
             
-            <button className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary/20 border border-primary/30 rounded text-[10px] font-mono text-primary hover:bg-primary/30 transition-colors">
+            <motion.button 
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary/20 border border-primary/30 rounded text-[10px] font-mono text-primary hover:bg-primary/30 transition-colors cursor-pointer"
+              whileHover={{ scale: 1.03, boxShadow: "0 0 15px hsl(var(--primary) / 0.3)" }}
+              whileTap={{ scale: 0.97 }}
+            >
               <Eye className="h-3 w-3" />
               View Full Report
-            </button>
+            </motion.button>
           </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   </div>
 );
 

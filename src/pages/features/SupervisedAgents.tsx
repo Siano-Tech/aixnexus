@@ -4,7 +4,11 @@ import { motion } from "framer-motion";
 
 const SupervisedAgentDemo = () => (
   <div className="w-full max-w-4xl mx-auto">
-    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-2xl">
+    <motion.div 
+      className="bg-card border border-border rounded-xl overflow-hidden shadow-2xl"
+      whileHover={{ scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
       {/* Header */}
       <div className="bg-muted/50 px-4 py-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -45,7 +49,8 @@ const SupervisedAgentDemo = () => (
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.15 }}
-              className={`flex items-center gap-3 p-2 rounded-lg ${
+              whileHover={{ x: 5, backgroundColor: "hsl(var(--muted) / 0.5)" }}
+              className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer ${
                 task.status === 'current' ? 'bg-primary/10 border border-primary/30' : ''
               }`}
             >
@@ -86,16 +91,18 @@ const SupervisedAgentDemo = () => (
                   { vendor: "DataFlow", price: "$28,200", score: "87%" },
                   { vendor: "CloudNine", price: "$31,000", score: "82%" },
                 ].map((v, i) => (
-                  <div 
+                  <motion.div 
                     key={v.vendor}
-                    className={`p-2 rounded-lg text-xs ${
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`p-2 rounded-lg text-xs cursor-pointer ${
                       i === 0 ? 'bg-primary/20 border border-primary/30' : 'bg-muted/50 border border-border'
                     }`}
                   >
                     <div className="font-medium">{v.vendor}</div>
                     <div className="text-muted-foreground">{v.price}</div>
                     <div className={i === 0 ? 'text-primary' : 'text-muted-foreground'}>Score: {v.score}</div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
@@ -104,17 +111,27 @@ const SupervisedAgentDemo = () => (
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.2 }}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm"
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px hsl(var(--primary) / 0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm cursor-pointer"
                 >
                   <ThumbsUp className="h-4 w-4" />
                   Approve
                 </motion.button>
-                <button className="px-4 py-2 bg-muted text-muted-foreground rounded-lg text-sm">
+                <motion.button 
+                  className="px-4 py-2 bg-muted text-muted-foreground rounded-lg text-sm cursor-pointer"
+                  whileHover={{ scale: 1.05, backgroundColor: "hsl(var(--muted))" }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   Request Changes
-                </button>
-                <button className="px-4 py-2 text-muted-foreground text-sm">
+                </motion.button>
+                <motion.button 
+                  className="px-4 py-2 text-muted-foreground text-sm cursor-pointer"
+                  whileHover={{ scale: 1.05, color: "hsl(var(--primary))" }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   View Full Report
-                </button>
+                </motion.button>
               </div>
             </div>
           </div>
@@ -124,17 +141,23 @@ const SupervisedAgentDemo = () => (
       {/* Footer */}
       <div className="px-4 py-3 border-t border-border bg-muted/30 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-xs">
+          <motion.div 
+            className="flex items-center gap-2 text-xs cursor-pointer"
+            whileHover={{ scale: 1.02 }}
+          >
             <Bot className="h-3 w-3 text-primary" />
             <span className="text-muted-foreground">Agent handled <span className="text-primary font-medium">4 of 5</span> steps autonomously</span>
-          </div>
+          </motion.div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <motion.div 
+          className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer"
+          whileHover={{ scale: 1.05, color: "hsl(var(--primary))" }}
+        >
           <User className="h-3 w-3" />
           Pending: @sarah.chen
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   </div>
 );
 

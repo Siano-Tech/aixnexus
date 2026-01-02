@@ -4,7 +4,11 @@ import { motion } from "framer-motion";
 
 const KnowledgeBotDemo = () => (
   <div className="w-full max-w-4xl mx-auto">
-    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-2xl">
+    <motion.div 
+      className="bg-card border border-border rounded-xl overflow-hidden shadow-2xl"
+      whileHover={{ scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
       {/* Chat Interface Header */}
       <div className="bg-muted/50 px-4 py-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -32,10 +36,15 @@ const KnowledgeBotDemo = () => (
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
           className="flex justify-end"
+          whileHover={{ x: -5 }}
         >
-          <div className="bg-primary text-primary-foreground px-4 py-2 rounded-2xl rounded-tr-sm max-w-[70%]">
+          <motion.div 
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-2xl rounded-tr-sm max-w-[70%] cursor-pointer"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
             <p className="text-sm">What's our policy on remote work for the engineering team?</p>
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Bot Response */}
@@ -65,14 +74,22 @@ const KnowledgeBotDemo = () => (
               transition={{ delay: 1 }}
               className="flex flex-wrap gap-2"
             >
-              <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded text-xs text-muted-foreground border border-border">
+              <motion.div 
+                className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded text-xs text-muted-foreground border border-border cursor-pointer"
+                whileHover={{ scale: 1.05, backgroundColor: "hsl(var(--primary) / 0.1)" }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <FileText className="h-3 w-3" />
                 HR-Policy-2024.pdf
-              </div>
-              <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded text-xs text-muted-foreground border border-border">
+              </motion.div>
+              <motion.div 
+                className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded text-xs text-muted-foreground border border-border cursor-pointer"
+                whileHover={{ scale: 1.05, backgroundColor: "hsl(var(--primary) / 0.1)" }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Database className="h-3 w-3" />
                 Employee Handbook
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </motion.div>
@@ -98,16 +115,24 @@ const KnowledgeBotDemo = () => (
       {/* Input Area */}
       <div className="p-4 border-t border-border bg-muted/30">
         <div className="flex items-center gap-3">
-          <div className="flex-1 bg-background border border-border rounded-lg px-4 py-2 flex items-center gap-2">
+          <motion.div 
+            className="flex-1 bg-background border border-border rounded-lg px-4 py-2 flex items-center gap-2 cursor-text"
+            whileHover={{ borderColor: "hsl(var(--primary) / 0.5)" }}
+            whileTap={{ scale: 0.99 }}
+          >
             <Search className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">Ask anything about company policies...</span>
-          </div>
-          <button className="p-2 bg-primary text-primary-foreground rounded-lg">
+          </motion.div>
+          <motion.button 
+            className="p-2 bg-primary text-primary-foreground rounded-lg"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
             <MessageSquare className="h-5 w-5" />
-          </button>
+          </motion.button>
         </div>
       </div>
-    </div>
+    </motion.div>
   </div>
 );
 
