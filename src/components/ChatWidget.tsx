@@ -1,14 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X, Send, Check, CheckCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useChatWidget } from '@/hooks/useChatWidget';
 
 export const ChatWidget: React.FC = () => {
-  const { isOpen, setIsOpen, messages, sendMessage, isLoading } = useChatWidget();
+  const location = useLocation();
+  const {
+    isOpen,
+    setIsOpen,
+    messages,
+    sendMessage,
+    isLoading,
+    unreadCount,
+    isAdminTyping,
+    handleTyping,
+    markMessagesAsRead,
+  } = useChatWidget();
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Hide chat widget on /chat route
+  if (location.pathname === '/chat') {
+    return null;
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -16,7 +33,7 @@ export const ChatWidget: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isAdminTyping]);
 
   const handleSend = () => {
     if (inputValue.trim()) {
@@ -32,12 +49,22 @@ export const ChatWidget: React.FC = () => {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    handleTyping();
+  };
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    markMessagesAsRead();
+  };
+
   return (
     <>
       {/* Chat Toggle Button */}
       <motion.button
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => (isOpen ? setIsOpen(false) : handleOpen())}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -57,8 +84,18 @@ export const ChatWidget: React.FC = () => {
               initial={{ rotate: 90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: -90, opacity: 0 }}
+              className="relative"
             >
               <MessageCircle className="w-6 h-6" />
+              {unreadCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center font-bold"
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </motion.span>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -106,22 +143,67 @@ export const ChatWidget: React.FC = () => {
                       }`}
                     >
                       <p className="text-sm">{message.content}</p>
-                      <span className="text-xs opacity-60 mt-1 block">
-                        {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
+                      <div className="flex items-center justify-end gap-1 mt-1">
+                        <span className="text-xs opacity-60">
+                          {new Date(message.created_at).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                        {message.sender_type === 'visitor' && (
+                          <span className="opacity-60">
+                            {message.read_at ? (
+                              <CheckCheck className="w-3 h-3" />
+                            ) : (
+                              <Check className="w-3 h-3" />
+                            )}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                 ))
               )}
+
+              {/* Typing indicator */}
+              {isAdminTyping && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="flex justify-start"
+                >
+                  <div className="bg-muted text-foreground rounded-2xl rounded-bl-md px-4 py-3">
+                    <div className="flex gap-1">
+                      <motion.span
+                        className="w-2 h-2 bg-muted-foreground rounded-full"
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
+                      />
+                      <motion.span
+                        className="w-2 h-2 bg-muted-foreground rounded-full"
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }}
+                      />
+                      <motion.span
+                        className="w-2 h-2 bg-muted-foreground rounded-full"
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-border">
+            <div className="p-4 border-t border-border bg-background">
               <div className="flex gap-2">
                 <Input
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Type a message..."
                   className="flex-1"

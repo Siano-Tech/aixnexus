@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Message {
@@ -7,6 +7,7 @@ export interface Message {
   sender_type: 'visitor' | 'admin';
   content: string;
   created_at: string;
+  read_at: string | null;
 }
 
 export interface Conversation {
@@ -27,18 +28,29 @@ const getVisitorId = () => {
   return visitorId;
 };
 
+// Notification sound
+const playNotificationSound = () => {
+  const audio = new Audio('/notification.mp3');
+  audio.volume = 0.5;
+  audio.play().catch(() => {
+    // Ignore autoplay errors
+  });
+};
+
 export const useChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isAdminTyping, setIsAdminTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const visitorId = getVisitorId();
 
   const initConversation = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Check for existing active conversation
       const { data: existingConv } = await supabase
         .from('conversations')
         .select('*')
@@ -48,7 +60,6 @@ export const useChatWidget = () => {
 
       if (existingConv) {
         setConversation(existingConv as Conversation);
-        // Load existing messages
         const { data: existingMessages } = await supabase
           .from('messages')
           .select('*')
@@ -57,9 +68,13 @@ export const useChatWidget = () => {
 
         if (existingMessages) {
           setMessages(existingMessages as Message[]);
+          // Count unread admin messages
+          const unread = existingMessages.filter(
+            (m) => m.sender_type === 'admin' && !m.read_at
+          ).length;
+          setUnreadCount(unread);
         }
       } else {
-        // Create new conversation
         const { data: newConv, error } = await supabase
           .from('conversations')
           .insert({ visitor_id: visitorId })
@@ -79,26 +94,56 @@ export const useChatWidget = () => {
   const sendMessage = async (content: string) => {
     if (!conversation || !content.trim()) return;
 
-    const { data, error } = await supabase
+    await supabase
       .from('messages')
       .insert({
         conversation_id: conversation.id,
         sender_type: 'visitor',
         content: content.trim(),
-      })
-      .select()
-      .single();
+      });
 
-    if (error) {
-      console.error('Error sending message:', error);
-      return;
-    }
-
-    // Update conversation timestamp
     await supabase
       .from('conversations')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', conversation.id);
+  };
+
+  const markMessagesAsRead = async () => {
+    if (!conversation) return;
+
+    await supabase
+      .from('messages')
+      .update({ read_at: new Date().toISOString() })
+      .eq('conversation_id', conversation.id)
+      .eq('sender_type', 'admin')
+      .is('read_at', null);
+
+    setUnreadCount(0);
+  };
+
+  const setTypingStatus = async (isTyping: boolean) => {
+    if (!conversation) return;
+
+    await supabase
+      .from('typing_status')
+      .upsert({
+        conversation_id: conversation.id,
+        sender_type: 'visitor',
+        is_typing: isTyping,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'conversation_id,sender_type' });
+  };
+
+  const handleTyping = () => {
+    setTypingStatus(true);
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      setTypingStatus(false);
+    }, 2000);
   };
 
   // Subscribe to realtime messages
@@ -116,20 +161,58 @@ export const useChatWidget = () => {
           filter: `conversation_id=eq.${conversation.id}`,
         },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message]);
+          const newMessage = payload.new as Message;
+          setMessages((prev) => [...prev, newMessage]);
+
+          if (newMessage.sender_type === 'admin') {
+            if (!isOpen) {
+              setUnreadCount((prev) => prev + 1);
+              playNotificationSound();
+            } else {
+              // Mark as read immediately if chat is open
+              supabase
+                .from('messages')
+                .update({ read_at: new Date().toISOString() })
+                .eq('id', newMessage.id);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to typing status
+    const typingChannel = supabase
+      .channel(`typing-${conversation.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'typing_status',
+          filter: `conversation_id=eq.${conversation.id}`,
+        },
+        (payload) => {
+          const status = payload.new as { sender_type: string; is_typing: boolean };
+          if (status.sender_type === 'admin') {
+            setIsAdminTyping(status.is_typing);
+          }
         }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(typingChannel);
     };
-  }, [conversation]);
+  }, [conversation, isOpen]);
 
   // Initialize conversation when chat opens
   useEffect(() => {
     if (isOpen && !conversation) {
       initConversation();
+    }
+    if (isOpen && conversation) {
+      markMessagesAsRead();
     }
   }, [isOpen, conversation, initConversation]);
 
@@ -140,5 +223,9 @@ export const useChatWidget = () => {
     conversation,
     sendMessage,
     isLoading,
+    unreadCount,
+    isAdminTyping,
+    handleTyping,
+    markMessagesAsRead,
   };
 };
