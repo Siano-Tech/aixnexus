@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Message, Conversation } from './useChatWidget';
 
+const ADMIN_ID = 'admin-1'; // Unique identifier for this admin session
+
 export const useAdminChat = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -10,6 +12,36 @@ export const useAdminChat = () => {
   const [isVisitorTyping, setIsVisitorTyping] = useState(false);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const presenceIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Update admin presence
+  const updatePresence = useCallback(async (isOnline: boolean) => {
+    await supabase
+      .from('admin_presence')
+      .upsert({
+        admin_id: ADMIN_ID,
+        is_online: isOnline,
+        last_seen_at: new Date().toISOString(),
+      }, { onConflict: 'admin_id' });
+  }, []);
+
+  // Set up presence tracking
+  useEffect(() => {
+    updatePresence(true);
+    
+    // Heartbeat every 30 seconds
+    presenceIntervalRef.current = setInterval(() => {
+      updatePresence(true);
+    }, 30000);
+
+    // Set offline on unmount
+    return () => {
+      if (presenceIntervalRef.current) {
+        clearInterval(presenceIntervalRef.current);
+      }
+      updatePresence(false);
+    };
+  }, [updatePresence]);
 
   const fetchConversations = useCallback(async () => {
     const { data, error } = await supabase
@@ -104,6 +136,42 @@ export const useAdminChat = () => {
     typingTimeoutRef.current = setTimeout(() => {
       setTypingStatus(false);
     }, 2000);
+  };
+
+  // Close/archive conversation
+  const updateConversationStatus = async (conversationId: string, status: 'active' | 'closed' | 'archived') => {
+    await supabase
+      .from('conversations')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', conversationId);
+
+    // Update local state
+    setConversations(prev => 
+      prev.map(c => c.id === conversationId ? { ...c, status } : c)
+    );
+
+    // Update selected conversation if it's the one being modified
+    if (selectedConversation?.id === conversationId) {
+      setSelectedConversation(prev => prev ? { ...prev, status } : null);
+    }
+  };
+
+  // Update conversation notes
+  const updateConversationNotes = async (conversationId: string, notes: string) => {
+    await supabase
+      .from('conversations')
+      .update({ notes, updated_at: new Date().toISOString() })
+      .eq('id', conversationId);
+
+    // Update local state
+    setConversations(prev => 
+      prev.map(c => c.id === conversationId ? { ...c, notes } : c)
+    );
+
+    // Update selected conversation if it's the one being modified
+    if (selectedConversation?.id === conversationId) {
+      setSelectedConversation(prev => prev ? { ...prev, notes } : null);
+    }
   };
 
   // Subscribe to realtime conversations
@@ -211,5 +279,7 @@ export const useAdminChat = () => {
     isVisitorTyping,
     handleTyping,
     unreadCounts,
+    updateConversationStatus,
+    updateConversationNotes,
   };
 };
