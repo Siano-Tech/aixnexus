@@ -185,6 +185,8 @@ export const ChatWidget: React.FC = () => {
                         {message.sender_type === 'visitor' && (
                           <span className="opacity-60">
                             {message.read_at ? (
+                              <CheckCheck className="w-3 h-3 text-blue-400" />
+                            ) : isAdminOnline ? (
                               <CheckCheck className="w-3 h-3" />
                             ) : (
                               <Check className="w-3 h-3" />

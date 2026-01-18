@@ -57,13 +57,13 @@ export const useChatWidget = () => {
 
   const visitorId = getVisitorId();
 
-  // Check admin presence
+  // Check admin presence - admin is online if they've sent a heartbeat in the last 60 seconds
   const checkAdminPresence = useCallback(async () => {
     const { data } = await supabase
       .from('admin_presence')
       .select('*')
       .eq('is_online', true)
-      .gte('last_seen_at', new Date(Date.now() - 5 * 60 * 1000).toISOString());
+      .gte('last_seen_at', new Date(Date.now() - 60 * 1000).toISOString());
     
     setIsAdminOnline((data?.length || 0) > 0);
   }, []);
