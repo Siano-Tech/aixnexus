@@ -14,9 +14,17 @@ export interface Conversation {
   id: string;
   visitor_id: string;
   visitor_name: string;
-  status: 'active' | 'closed';
+  status: 'active' | 'closed' | 'archived';
   created_at: string;
   updated_at: string;
+  notes: string | null;
+}
+
+export interface AdminPresence {
+  id: string;
+  admin_id: string;
+  is_online: boolean;
+  last_seen_at: string;
 }
 
 const getVisitorId = () => {
@@ -44,9 +52,45 @@ export const useChatWidget = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAdminTyping, setIsAdminTyping] = useState(false);
+  const [isAdminOnline, setIsAdminOnline] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const visitorId = getVisitorId();
+
+  // Check admin presence
+  const checkAdminPresence = useCallback(async () => {
+    const { data } = await supabase
+      .from('admin_presence')
+      .select('*')
+      .eq('is_online', true)
+      .gte('last_seen_at', new Date(Date.now() - 5 * 60 * 1000).toISOString());
+    
+    setIsAdminOnline((data?.length || 0) > 0);
+  }, []);
+
+  // Subscribe to admin presence changes
+  useEffect(() => {
+    checkAdminPresence();
+    
+    const presenceChannel = supabase
+      .channel('admin-presence-visitor')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'admin_presence',
+        },
+        () => {
+          checkAdminPresence();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(presenceChannel);
+    };
+  }, [checkAdminPresence]);
 
   const initConversation = useCallback(async () => {
     setIsLoading(true);
@@ -225,6 +269,7 @@ export const useChatWidget = () => {
     isLoading,
     unreadCount,
     isAdminTyping,
+    isAdminOnline,
     handleTyping,
     markMessagesAsRead,
   };

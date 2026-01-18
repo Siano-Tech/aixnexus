@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Check, CheckCheck } from 'lucide-react';
+import { MessageCircle, X, Send, Check, CheckCheck, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useChatWidget } from '@/hooks/useChatWidget';
@@ -16,6 +16,7 @@ export const ChatWidget: React.FC = () => {
     isLoading,
     unreadCount,
     isAdminTyping,
+    isAdminOnline,
     handleTyping,
     markMessagesAsRead,
   } = useChatWidget();
@@ -112,8 +113,39 @@ export const ChatWidget: React.FC = () => {
           >
             {/* Header */}
             <div className="bg-primary text-primary-foreground p-4">
-              <h3 className="font-semibold">Chat with us</h3>
-              <p className="text-sm opacity-80">We typically reply within minutes</p>
+              {isAdminOnline ? (
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Support Agent</h3>
+                    <p className="text-sm opacity-80">
+                      {isAdminTyping ? (
+                        <span className="flex items-center gap-1">
+                          <span>Typing</span>
+                          <motion.span
+                            animate={{ opacity: [1, 0.5, 1] }}
+                            transition={{ repeat: Infinity, duration: 1 }}
+                          >
+                            ...
+                          </motion.span>
+                        </span>
+                      ) : (
+                        'Online'
+                      )}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h3 className="font-semibold">Chat with us</h3>
+                  <p className="text-sm opacity-80">We typically reply within minutes</p>
+                </>
+              )}
             </div>
 
             {/* Messages */}
@@ -128,7 +160,7 @@ export const ChatWidget: React.FC = () => {
                   <p>Start a conversation!</p>
                 </div>
               ) : (
-                messages.map((message) => (
+                messages.filter(m => m.content).map((message) => (
                   <motion.div
                     key={message.id}
                     initial={{ opacity: 0, y: 10 }}

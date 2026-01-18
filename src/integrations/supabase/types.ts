@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_presence: {
+        Row: {
+          admin_id: string
+          id: string
+          is_online: boolean
+          last_seen_at: string
+        }
+        Insert: {
+          admin_id: string
+          id?: string
+          is_online?: boolean
+          last_seen_at?: string
+        }
+        Update: {
+          admin_id?: string
+          id?: string
+          is_online?: boolean
+          last_seen_at?: string
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string
@@ -39,6 +60,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          notes: string | null
           status: string
           updated_at: string
           visitor_id: string
@@ -47,6 +69,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          notes?: string | null
           status?: string
           updated_at?: string
           visitor_id: string
@@ -55,6 +78,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          notes?: string | null
           status?: string
           updated_at?: string
           visitor_id?: string

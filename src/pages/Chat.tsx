@@ -1,11 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Send, User, Clock, Check, CheckCheck, LogOut } from 'lucide-react';
+import { MessageCircle, Send, User, Clock, Check, CheckCheck, LogOut, Archive, X as XIcon, FileText, Save, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useAdminChat } from '@/hooks/useAdminChat';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { formatDistanceToNow } from 'date-fns';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const AdminLogin: React.FC<{
   onLogin: (username: string, password: string) => Promise<boolean>;
@@ -88,13 +95,31 @@ const Chat: React.FC = () => {
     isVisitorTyping,
     handleTyping,
     unreadCounts,
+    updateConversationStatus,
+    updateConversationNotes,
   } = useAdminChat();
   const [inputValue, setInputValue] = useState('');
+  const [showNotes, setShowNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'closed' | 'archived'>('all');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Sync notes with selected conversation
+  useEffect(() => {
+    if (selectedConversation) {
+      setNotesValue(selectedConversation.notes || '');
+    }
+  }, [selectedConversation]);
+
+  // Filter conversations based on status
+  const filteredConversations = conversations.filter(conv => {
+    if (statusFilter === 'all') return true;
+    return conv.status === statusFilter;
+  });
 
   useEffect(() => {
     scrollToBottom();
@@ -142,7 +167,7 @@ const Chat: React.FC = () => {
               Chat Dashboard
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+              {filteredConversations.length} conversation{filteredConversations.length !== 1 ? 's' : ''}
             </p>
           </div>
           <Button variant="ghost" size="icon" onClick={logout} title="Logout">
@@ -150,19 +175,38 @@ const Chat: React.FC = () => {
           </Button>
         </div>
 
+        {/* Status Filter */}
+        <div className="p-2 border-b border-border flex gap-1">
+          {(['all', 'active', 'closed', 'archived'] as const).map((status) => (
+            <Button
+              key={status}
+              variant={statusFilter === status ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setStatusFilter(status)}
+              className="flex-1 text-xs capitalize"
+            >
+              {status}
+            </Button>
+          ))}
+        </div>
+
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center h-32">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : conversations.length === 0 ? (
+          ) : filteredConversations.length === 0 ? (
             <div className="text-center text-muted-foreground py-8 px-4">
               <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>No conversations yet</p>
-              <p className="text-sm mt-1">Waiting for visitors to start chatting...</p>
+              <p>No conversations</p>
+              <p className="text-sm mt-1">
+                {statusFilter === 'all' 
+                  ? 'Waiting for visitors to start chatting...'
+                  : `No ${statusFilter} conversations`}
+              </p>
             </div>
           ) : (
-            conversations.map((conv) => (
+            filteredConversations.map((conv) => (
               <motion.button
                 key={conv.id}
                 onClick={() => setSelectedConversation(conv)}
@@ -189,6 +233,8 @@ const Chat: React.FC = () => {
                         className={`text-xs px-2 py-0.5 rounded-full ${
                           conv.status === 'active'
                             ? 'bg-green-500/10 text-green-500'
+                            : conv.status === 'closed'
+                            ? 'bg-yellow-500/10 text-yellow-500'
                             : 'bg-muted-foreground/10 text-muted-foreground'
                         }`}
                       >
@@ -198,6 +244,7 @@ const Chat: React.FC = () => {
                     <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                       <Clock className="w-3 h-3" />
                       {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
+                      {conv.notes && <FileText className="w-3 h-3 ml-1 text-primary" />}
                     </div>
                   </div>
                 </div>
@@ -213,24 +260,97 @@ const Chat: React.FC = () => {
           <>
             {/* Chat Header */}
             <div className="p-4 border-b border-border bg-background">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold">
+                      {selectedConversation.visitor_name || 'Visitor'}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      {isVisitorTyping ? (
+                        <span className="text-primary">Typing...</span>
+                      ) : (
+                        `ID: ${selectedConversation.visitor_id.slice(0, 8)}...`
+                      )}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="font-semibold">
-                    {selectedConversation.visitor_name || 'Visitor'}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {isVisitorTyping ? (
-                      <span className="text-primary">Typing...</span>
-                    ) : (
-                      `ID: ${selectedConversation.visitor_id.slice(0, 8)}...`
-                    )}
-                  </p>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowNotes(!showNotes)}
+                    className={showNotes ? 'bg-primary/10' : ''}
+                  >
+                    <FileText className="w-4 h-4 mr-1" />
+                    Notes
+                  </Button>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {selectedConversation.status !== 'active' && (
+                        <DropdownMenuItem onClick={() => updateConversationStatus(selectedConversation.id, 'active')}>
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          Reopen
+                        </DropdownMenuItem>
+                      )}
+                      {selectedConversation.status !== 'closed' && (
+                        <DropdownMenuItem onClick={() => updateConversationStatus(selectedConversation.id, 'closed')}>
+                          <XIcon className="w-4 h-4 mr-2" />
+                          Close
+                        </DropdownMenuItem>
+                      )}
+                      {selectedConversation.status !== 'archived' && (
+                        <DropdownMenuItem onClick={() => updateConversationStatus(selectedConversation.id, 'archived')}>
+                          <Archive className="w-4 h-4 mr-2" />
+                          Archive
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>
+
+            {/* Notes Panel */}
+            <AnimatePresence>
+              {showNotes && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="border-b border-border bg-muted/30 overflow-hidden"
+                >
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Conversation Notes</span>
+                      <Button 
+                        size="sm" 
+                        onClick={() => updateConversationNotes(selectedConversation.id, notesValue)}
+                      >
+                        <Save className="w-4 h-4 mr-1" />
+                        Save
+                      </Button>
+                    </div>
+                    <Textarea
+                      value={notesValue}
+                      onChange={(e) => setNotesValue(e.target.value)}
+                      placeholder="Add notes about this conversation..."
+                      className="min-h-[80px] resize-none"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/20">
