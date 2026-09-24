@@ -69,7 +69,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
           role: result.data.role,
           message: result.data.message,
         },
-        `Demo request from ${result.data.name} (${result.data.company})`,
+        `Demo request: ${result.data.name} (${result.data.company})`,
       );
       setIsSubmitted(true);
     } catch {
