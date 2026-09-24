@@ -60,7 +60,7 @@ export function ContactFormSection() {
           company: result.data.company,
           message: result.data.message,
         },
-        `Contact form from ${result.data.name} (${result.data.company})`,
+        `Contact form: ${result.data.name} (${result.data.company})`,
       );
       setIsSubmitted(true);
       toast({

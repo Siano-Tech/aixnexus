@@ -7,7 +7,7 @@ export async function submitToStaticForms(
 ) {
   const body = new FormData();
   body.append("apiKey", STATICFORMS_API_KEY);
-  body.append("subject", subject);
+  body.append("subject", `[AI Nexus] ${subject}`);
 
   Object.entries(fields).forEach(([key, value]) => {
     if (value && value.trim().length > 0) {
